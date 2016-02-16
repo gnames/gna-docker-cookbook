@@ -1,0 +1,22 @@
+#!/bin/bash
+
+/usr/bin/docker run -d --name <%= @name %> \
+  <%- @env_files.each do |env_file| %>
+    --env-file <%= env_file %> \
+  <%- end -%>
+  <%- if @params["cpu_cap"] %>
+    -c <%= @params["cpu_cap"] %> \
+  <%- end -%>
+  <%- if @params["mem_cap"] %>
+    -m <%= @params["mem_cap"] %> \
+  <%- end -%>
+  <%- @shared_ports.each do |ports| %>
+    -p <%= ports[0] %>:<%= ports[1] %> \
+  <%- end -%>
+  <%- @shared_files.each do |files| %>
+    -v <%= files[0] %>:<%= files[1] %> \
+  <%- end -%>
+  <%- @shared_config_files.each do |files| %>
+    -v <%= files[0] %>:<%= files[1] %> \
+  <%- end -%>
+  <%= @params["image"] %>:<%= @params["version"] %>

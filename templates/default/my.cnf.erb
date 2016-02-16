@@ -1,0 +1,97 @@
+[mysqld]
+
+user                        = mysql
+
+character_set_filesystem    = utf8
+character-set-server        = utf8
+
+default-character-set       = utf8
+
+expire-logs-days            = 14
+
+# Setting this to 0 will let mysql set the value itself on startup, though this
+# does not appear to yield a fantastic value for docker containers, so we are
+# setting it explicitly. 1024 is the default, and it was causing errors. 1000000
+# is the limit on our slaves, and that seems high. Sooo:
+open_files_limit            = 65536 # Default 1024, we *'ed it by 64.
+
+init-connect                = "SET NAMES utf8"
+innodb_additional_mem_pool  = 20M
+innodb_buffer_pool_size     = <%= @params["innodb_buffer_pool_size"] %>
+innodb_file_per_table
+innodb_flush_method         = O_DIRECT
+innodb_log_file_size        = 1G
+innodb_thread_concurrency   = 20 # A recommended value is 2 times the number of CPUs plus the number of disks.
+innodb_open_files           = 19200 # Default 300, we *'ed it by 64.
+interactive_timeout         = 3600 # 2 hours
+wait_timeout                = 150000 # almost 42 hours! (was 3600, 2 hours, default 28800)
+
+join_buffer                 = 2M
+key_buffer_size             = 1G
+
+log_error                   = /var/log/mysql/error.log
+
+<%- if @params["binlog"] && @params["binlog"] == "true" -%>
+# BINARY LOGGING #
+log-bin                     = /var/lib/mysql/mysql-bin
+expire-logs-days            = 14
+sync-binlog                 = 1
+max-binlog-size             = 100M
+<%- end -%>
+
+long_query_time             = 0
+
+max_allowed_packet          = 16M
+max_connect_errors          = 10
+max_connections             = 1200
+myisam_sort_buffer_size     = 64M
+
+query_cache_type            = 1
+query_cache_limit           = 1M
+query_cache_size            = 32M
+
+read_buffer_size            = 2M
+read_rnd_buffer_size        = 2M
+
+server-id                   = <%= @params["server_id"] %>
+skip-name-resolve
+socket                      = /var/run/mysqld/mysqld.sock
+sort_buffer_size            = 4M
+
+table_cache                 = 1500
+thread_cache_size           = 128
+thread_concurrency          = 8  # MySQL Docs say thread_concurrency is specific to Solaris.
+tmp_table_size              = 32M
+
+<%- if @params["replication_slave"] -%>
+read-only                      = 1
+skip-slave-start               = 1
+log-slave-updates              = 1
+relay-log                      = /var/lib/mysql/relay-bin
+slave-net-timeout              = 60
+# list of errors which will not stop replication
+# 1062 error in SQL synthax, usually if column is a reserved word
+slave-skip-errors              = 1062
+
+replicate-do-db                = gni_production
+
+# To be concervative: comment out row format
+# binlog-format                  = row
+
+<%- end -%>
+####################################
+[client]
+
+default-character-set       = utf8
+port                        = 3306
+socket                      = /var/run/mysqld/mysqld.sock
+
+####################################
+[mysql]
+
+default-character-set       = utf8
+
+####################################
+[mysql.server]
+
+ft_min_word_len             = 2

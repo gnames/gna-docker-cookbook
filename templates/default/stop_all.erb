@@ -1,0 +1,6 @@
+#!/bin/bash
+echo "Stopping all containers: <%= @names.join(', ') %>"
+<%- @names.each do |name| -%>
+/usr/local/bin/<%= name %>_stop
+<%- end -%>
+echo "(Note that a chef run will restart these containers!)"

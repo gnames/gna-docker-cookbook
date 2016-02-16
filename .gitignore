@@ -1,0 +1,4 @@
+.kitchen/
+## master...origin/master
+.bundle/
+bundle_bin/

@@ -1,0 +1,91 @@
+################### backends ###################
+
+backend sysopia {
+  .host = "<%= @params["sysopia_ip"] %>";
+  .port = "<%= @params["sysopia_port"] %>";
+  .probe = {
+    .url = "/favicon.ico";
+    .interval = 5s;
+    .timeout = 1s;
+    .window = 5;
+    .threshold = 3;
+  }
+}
+
+backend gni {
+  .host = "<%= @params["gni_ip"] %>";
+  .port = "<%= @params["gni_port"] %>";
+  .probe = {
+    .url = "/favicon.ico";
+    .interval = 5s;
+    .timeout = 1s;
+    .window = 5;
+    .threshold = 3;
+  }
+}
+
+backend sensu {
+  .host = "<%= @params["sensu_ip"] %>";
+  .port = "<%= @params["sensu_port"] %>";
+}
+
+
+### APPSERVERS ####
+<%- @params["apps"].each do |app| %>
+backend app<%= app["name"] %> {
+  .host= "<%= app["ip"] %>";
+  .port = "<%= app["port"] %>";
+  .first_byte_timeout = 120s;
+  .probe = { .url = "/api/ping.json"; .interval = 5s;
+    .timeout = 3s; .window = 5; .threshold = 3; }
+}
+<%- end %>
+
+##################### ACL ######################
+
+# Specific IP addresses that we have found to abuse our policies:
+
+acl unwanted {
+  "68.180.228.106";
+}
+
+################## directors ###################
+
+# These are our public app servers:
+<%- groups = @params["apps"].group_by { |app| app["director"] } %>
+<%- groups.each do |group_name, group| %>
+director <%= group_name %> random {
+  .retries = 5;
+  <%- group.each do |app| %>
+  { .backend = app<%= app["name"] %>; .weight = 5; }
+  <%- end %>
+}
+<%- end %>
+
+sub vcl_recv {
+  if (req.http.Accept-Encoding) {
+    if (req.url ~ "\.(jpg|png|gif|gz|tgz|bz2|tbz|mp3|ogg)$") {
+# No point in compressing these
+      remove req.http.Accept-Encoding;
+    } else if (req.http.Accept-Encoding ~ "gzip") {
+      set req.http.Accept-Encoding = "gzip";
+    } else if (req.http.Accept-Encoding ~ "deflate") {
+      set req.http.Accept-Encoding = "deflate";
+    } else {
+# unknown algorithm
+      remove req.http.Accept-Encoding;
+    }
+  }
+  } if (client.ip ~ unwanted) {
+    error 410;
+  } elseif (req.http.host ~ "^<%= @params["sysopia_host"] %>$") {
+    set req.backend = sysopia;
+  } elseif (req.http.host ~ "^<%= @params["gni_host"] %>$") {
+    set req.backend = gni;
+  } elseif (req.http.host ~ "^<%= @params["sensu_host"] %>$") {
+    set req.backend = sensu;
+  } else {
+    #set req.backend = appfarm;
+    error 404;
+  }
+}

@@ -1,0 +1,18 @@
+import std;
+
+# I'm not sure these values actually matter, here, but they need to be defined:
+backend default {
+  .host = "127.0.0.1";
+  .port = "8080";
+}
+
+sub vcl_recv {
+  error 503;
+}
+
+sub vcl_error
+{
+  set obj.http.Content-Type = "text/html; charset=utf-8";
+  synthetic std.fileread("/etc/varnish/503.html");
+  return(deliver);
+}

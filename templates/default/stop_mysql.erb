@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [[ $(/usr/bin/docker ps |grep <%= @name %>) ]]; then
+  /usr/bin/docker exec <%= @name %> /stop.sh
+fi
+sleep 1
+if [[ $(/usr/bin/docker ps |grep <%= @name %>) ]]; then
+  /usr/bin/docker stop <%= @name %>
+fi
+if [[ $(/usr/bin/docker ps -a |grep <%= @name %>) ]]; then
+  /usr/bin/docker rm <%= @name %>
+fi
