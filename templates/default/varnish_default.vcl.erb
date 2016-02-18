@@ -75,7 +75,6 @@ sub vcl_recv {
 # unknown algorithm
       remove req.http.Accept-Encoding;
     }
-  }
   } if (client.ip ~ unwanted) {
     error 410;
   } elseif (req.http.host ~ "^<%= @params["sysopia_host"] %>$") {
