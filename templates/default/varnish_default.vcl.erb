@@ -24,6 +24,18 @@ backend gni {
   }
 }
 
+backend index {
+  .host = "<%= @params["index_ip"] %>";
+  .port = "<%= @params["index_port"] %>";
+  .probe = {
+    .url = "/favicon.ico";
+    .interval = 5s;
+    .timeout = 1s;
+    .window = 5;
+    .threshold = 3;
+  }
+}
+
 backend sensu {
   .host = "<%= @params["sensu_ip"] %>";
   .port = "<%= @params["sensu_port"] %>";
@@ -81,6 +93,8 @@ sub vcl_recv {
     set req.backend = sysopia;
   } elseif (req.http.host ~ "^<%= @params["gni_host"] %>$") {
     set req.backend = gni;
+  } elseif (req.http.host ~ "^<%= @params["index_host"] %>$") {
+    set req.backend = index;
   } elseif (req.http.host ~ "^<%= @params["sensu_host"] %>$") {
     set req.backend = sensu;
   } else {
