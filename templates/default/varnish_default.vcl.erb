@@ -24,31 +24,19 @@ backend gni {
   }
 }
 
-backend index {
-  .host = "<%= @params["index_ip"] %>";
-  .port = "<%= @params["index_port"] %>";
-  .probe = {
-    .url = "/favicon.ico";
-    .interval = 5s;
-    .timeout = 1s;
-    .window = 5;
-    .threshold = 3;
-  }
-}
-
 backend sensu {
   .host = "<%= @params["sensu_ip"] %>";
   .port = "<%= @params["sensu_port"] %>";
 }
 
 
-### APPSERVERS ####
-<%- @params["apps"].each do |app| %>
-backend app<%= app["name"] %> {
-  .host= "<%= app["ip"] %>";
-  .port = "<%= app["port"] %>";
+### Resolver ####
+<%- @params["resolvers"].each do |res| %>
+backend app<%= res["name"] %> {
+  .host= "<%= res["ip"] %>";
+  .port = "<%= res["port"] %>";
   .first_byte_timeout = 120s;
-  .probe = { .url = "/api/ping.json"; .interval = 5s;
+  .probe = { .url = "/"; .interval = 5s;
     .timeout = 3s; .window = 5; .threshold = 3; }
 }
 <%- end %>
@@ -93,10 +81,10 @@ sub vcl_recv {
     set req.backend = sysopia;
   } elseif (req.http.host ~ "^<%= @params["gni_host"] %>$") {
     set req.backend = gni;
-  } elseif (req.http.host ~ "^<%= @params["index_host"] %>$") {
-    set req.backend = index;
   } elseif (req.http.host ~ "^<%= @params["sensu_host"] %>$") {
     set req.backend = sensu;
+  } elseif (req.http.host ~ "^<%= @params["resolver_host"] %>$") {
+    set req.backend = resolver;
   } else {
     #set req.backend = appfarm;
     error 404;
