@@ -90,7 +90,7 @@ define :docker_container, config: nil do
     end
   end
 
-  execute "/usr/local/bin/#{conf['name']}_restart" do
+  execute "/usr/local/bin/#{conf['name']}-restart" do
     user "root"
     not_if "/usr/bin/docker ps | grep #{conf['name']}"
   end
