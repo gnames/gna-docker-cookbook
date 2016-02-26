@@ -74,8 +74,8 @@ define :docker_container, config: nil do
   end
 
   sf = conf["service_files"]
-  %w(start stop restart).each do |actn|
-    file_name = "#{conf['name']}_#{actn}"
+  %w(start stop restart bash).each do |actn|
+    file_name = "#{conf['name']}-#{actn}"
     template "/usr/local/bin/#{file_name}" do
       source sf[actn + "_template"]
       variables params: params,

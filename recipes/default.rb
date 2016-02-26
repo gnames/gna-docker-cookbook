@@ -45,7 +45,7 @@ end
   end
 end
 
-template "/usr/local/bin/stop_all" do
+template "/usr/local/bin/stop-all" do
   source "stop_all.erb"
   variables names: names
   mode "775"
@@ -53,7 +53,7 @@ template "/usr/local/bin/stop_all" do
   group "docker"
 end
 
-template "/usr/local/bin/restart_all" do
+template "/usr/local/bin/restart-all" do
   source "restart_all.erb"
   variables names: names
   mode "775"
