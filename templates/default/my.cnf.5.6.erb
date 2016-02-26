@@ -66,8 +66,8 @@ max-binlog-size                = 100M
 
 #REPLICATION
 server-id                      = <%= @params["server_id"] %>
-<%- if @params["replicate_db"] && @params["replicate_db"].class == Array -%>
-  <%- @params["replicate_db"].each do |db| -%>
+<%- if @params["replicate_db"] -%>
+  <%- @params["replicate_db"].split("|").each do |db| -%>
 replicate-do-db                = <%= db %>
   <%- end -%>
 <%- end -%>
