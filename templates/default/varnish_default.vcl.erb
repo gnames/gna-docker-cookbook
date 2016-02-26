@@ -24,19 +24,31 @@ backend gni {
   }
 }
 
+backend resolver_bhl {
+  .host = "<%= @params["resolver_bhl_ip"] %>";
+  .port = "<%= @params["resolver_bhl_port"] %>";
+  .probe = {
+    .url = "/favicon.ico";
+    .interval = 5s;
+    .timeout = 1s;
+    .window = 5;
+    .threshold = 3;
+  }
+}
+
 backend sensu {
   .host = "<%= @params["sensu_ip"] %>";
   .port = "<%= @params["sensu_port"] %>";
 }
 
 
-### APPSERVERS ####
-<%- @params["apps"].each do |app| %>
-backend app<%= app["name"] %> {
-  .host= "<%= app["ip"] %>";
-  .port = "<%= app["port"] %>";
+### Resolver ####
+<%- @params["resolvers"].each do |res| %>
+backend <%= res["name"] %> {
+  .host= "<%= res["ip"] %>";
+  .port = "<%= res["port"] %>";
   .first_byte_timeout = 120s;
-  .probe = { .url = "/api/ping.json"; .interval = 5s;
+  .probe = { .url = "/"; .interval = 5s;
     .timeout = 3s; .window = 5; .threshold = 3; }
 }
 <%- end %>
@@ -46,18 +58,22 @@ backend app<%= app["name"] %> {
 # Specific IP addresses that we have found to abuse our policies:
 
 acl unwanted {
-  "68.180.228.106";
+  "68.1.1.1";
+}
+
+acl local {
+ "172.22.247.18";
 }
 
 ################## directors ###################
 
-# These are our public app servers:
-<%- groups = @params["apps"].group_by { |app| app["director"] } %>
+# These are our public resolution servers:
+<%- groups = @params["resolvers"].group_by { |res| res["director"] } %>
 <%- groups.each do |group_name, group| %>
 director <%= group_name %> random {
   .retries = 5;
-  <%- group.each do |app| %>
-  { .backend = app<%= app["name"] %>; .weight = 5; }
+  <%- group.each do |res| %>
+  { .backend = <%= res["name"] %>; .weight = 5; }
   <%- end %>
 }
 <%- end %>
@@ -75,7 +91,6 @@ sub vcl_recv {
 # unknown algorithm
       remove req.http.Accept-Encoding;
     }
-  }
   } if (client.ip ~ unwanted) {
     error 410;
   } elseif (req.http.host ~ "^<%= @params["sysopia_host"] %>$") {
@@ -84,6 +99,12 @@ sub vcl_recv {
     set req.backend = gni;
   } elseif (req.http.host ~ "^<%= @params["sensu_host"] %>$") {
     set req.backend = sensu;
+  } elseif (req.http.host ~ "^<%= @params["resolver_host"] %>$") {
+    if (client.ip ~ local) {
+      set req.backend = resolver_bhl;
+    } else {
+      set req.backend = resolver;
+    }
   } else {
     #set req.backend = appfarm;
     error 404;

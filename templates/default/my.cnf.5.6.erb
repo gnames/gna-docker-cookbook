@@ -66,8 +66,11 @@ max-binlog-size                = 100M
 
 #REPLICATION
 server-id                      = <%= @params["server_id"] %>
-replicate-do-db                = eol_logging_production
-replicate-do-db                = eol_production
+<%- if @params["replicate_db"] && @params["replicate_db"].class == Array -%>
+  <%- @params["replicate_db"].each do |db| -%>
+replicate-do-db                = <%= db %>
+  <%- end -%>
+<%- end -%>
 <%- if @params["replication_slave"] -%>
 read-only                      = 1
 skip-slave-start               = 1
