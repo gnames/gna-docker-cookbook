@@ -12,6 +12,11 @@ backend sysopia {
   }
 }
 
+backend gnparser {
+  .host = "<%= @params["gnparser_ip"] %>";
+  .port = "<%= @params["gnparser_port"] %>";
+}
+
 backend gni {
   .host = "<%= @params["gni_ip"] %>";
   .port = "<%= @params["gni_port"] %>";
@@ -22,6 +27,16 @@ backend gni {
     .window = 5;
     .threshold = 3;
   }
+}
+
+backend gnresolver {
+  .host = "<%= @params["gnresolver_ip"] %>";
+  .port = "<%= @params["gnresolver_port"] %>";
+}
+
+backend gnresolver_api {
+  .host = "<%= @params["gnresolver_api_ip"] %>";
+  .port = "<%= @params["gnresolver_api_port"] %>";
 }
 
 backend resolver_bhl {
@@ -97,6 +112,14 @@ sub vcl_recv {
     set req.backend = sysopia;
   } elseif (req.http.host ~ "^<%= @params["gni_host"] %>$") {
     set req.backend = gni;
+  } elseif (req.http.host ~ "^<%= @params["gnparser_host"] %>$") {
+    set req.backend = gnparser;
+  } elseif (req.http.host ~ "^<%= @params["gnresolver"] %>$") {
+    if (req.url ~ "^/api") {
+      set req.backend = gnresolver_api;
+    } else {
+      set req.backend = gnresolver;
+    }
   } elseif (req.http.host ~ "^<%= @params["sensu_host"] %>$") {
     set req.backend = sensu;
   } elseif (req.http.host ~ "^<%= @params["resolver_host"] %>$") {
