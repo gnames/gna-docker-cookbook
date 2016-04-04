@@ -114,7 +114,7 @@ sub vcl_recv {
     set req.backend = gni;
   } elseif (req.http.host ~ "^<%= @params["gnparser_host"] %>$") {
     set req.backend = gnparser;
-  } elseif (req.http.host ~ "^<%= @params["gnresolver"] %>$") {
+  } elseif (req.http.host ~ "^<%= @params["gnresolver_host"] %>$") {
     if (req.url ~ "^/api") {
       set req.backend = gnresolver_api;
     } else {
