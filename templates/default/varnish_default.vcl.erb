@@ -17,6 +17,11 @@ backend gnparser {
   .port = "<%= @params["gnparser_port"] %>";
 }
 
+backend gnite {
+  .host = "<%= @params["gnite_ip"] %>";
+  .port = "<%= @params["gnite_port"] %>";
+}
+
 backend gni {
   .host = "<%= @params["gni_ip"] %>";
   .port = "<%= @params["gni_port"] %>";
@@ -119,6 +124,8 @@ sub vcl_recv {
     set req.backend = gni;
   } elseif (req.http.host ~ "^<%= @params["gnparser_host"] %>$") {
     set req.backend = gnparser;
+  } elseif (req.http.host ~ "^<%= @params["gnite_host"] %>$") {
+    set req.backend = gnite;
   } elseif (req.http.host ~ "^<%= @params["gnrd_host"] %>$") {
     set req.backend = gnrd;
   } elseif (req.http.host ~ "^<%= @params["gnresolver_host"] %>$") {
