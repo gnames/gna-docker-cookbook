@@ -39,6 +39,11 @@ backend gnrd {
   .port = "<%= @params["gnrd_port"] %>";
 }
 
+backend gnrdbhl {
+  .host = "<%= @params["gnrdbhl_ip"] %>";
+  .port = "<%= @params["gnrdbhl_port"] %>";
+}
+
 backend gnresolver {
   .host = "<%= @params["gnresolver_ip"] %>";
   .port = "<%= @params["gnresolver_port"] %>";
@@ -128,6 +133,8 @@ sub vcl_recv {
     set req.backend = gnite;
   } elseif (req.http.host ~ "^<%= @params["gnrd_host"] %>$") {
     set req.backend = gnrd;
+  } elseif (req.http.host ~ "^<%= @params["gnrdbhl_host"] %>$") {
+    set req.backend = gnrdbhl;
   } elseif (req.http.host ~ "^<%= @params["gnresolver_host"] %>$") {
     if (req.url ~ "^/api") {
       set req.backend = gnresolver_api;
