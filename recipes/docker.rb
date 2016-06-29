@@ -1,7 +1,7 @@
 def install_ubuntu
   include_recipe "apt"
-  package pt-transport-https
-  package ca-certificates
+  package "apt-transport-https"
+  package "ca-certificates"
 
   apt_package "lxc-docker" do
     action :purge
