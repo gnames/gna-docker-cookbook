@@ -46,7 +46,7 @@ end
 end
 
 template "/usr/local/bin/stop-all" do
-  source "stop_all.erb"
+  source "stop-all.erb"
   variables names: names
   mode "775"
   user "root"
@@ -54,7 +54,7 @@ template "/usr/local/bin/stop-all" do
 end
 
 template "/usr/local/bin/restart-all" do
-  source "restart_all.erb"
+  source "restart-all.erb"
   variables names: names
   mode "775"
   user "root"

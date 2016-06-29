@@ -3,10 +3,6 @@ def install_ubuntu
   package "apt-transport-https"
   package "ca-certificates"
 
-  apt_package "lxc-docker" do
-    action :purge
-  end
-
   apt_repository "docker" do
     uri "http://get.docker.com/ubuntu"
     uri "https://apt.dockerproject.org/repo"

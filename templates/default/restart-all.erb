@@ -1,5 +1,5 @@
 #!/bin/bash
 echo "Restarting containers for <%= @names.join(', ') %>"
 <%- @names.each do |name| -%>
-/usr/local/bin/<%= name %>_restart  
+/usr/local/bin/<%= name %>-restart  
 <%- end -%>
