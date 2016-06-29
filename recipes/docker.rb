@@ -1,14 +1,24 @@
 def install_ubuntu
   include_recipe "apt"
+  package pt-transport-https
+  package ca-certificates
+
+  apt_package "lxc-docker" do
+    action :purge
+  end
+
   apt_repository "docker" do
     uri "http://get.docker.com/ubuntu"
-    distribution "docker"
+    uri "https://apt.dockerproject.org/repo"
+    distribution "ubuntu-trusty"
     #distribution node["lsb"]["codename"]
     components ["main"]
-    keyserver "keyserver.ubuntu.com"
-    key "36A1D7869245C8950F966E92D8576A8BA88D21E9"
+    keyserver "hkp://p80.pool.sks-keyservers.net:80"
+    key "58118E89F3A912897C070ADBF76221572C52609D"
   end
-  package "lxc-docker"
+
+  package "docker-engine"
+
 end
 
 def install_rhel
