@@ -19,4 +19,4 @@
   <%- @shared_config_files.each do |files| %>
     -v <%= files[0] %>:<%= files[1] %> \
   <%- end -%>
-  <%= @params["image"] %>:<%= @params["version"] %>
+  <%= @params["image"] %>:<%= @params["version"] %> <%= @params["cmd"] %>

@@ -54,6 +54,11 @@ backend gnresolver_api {
   .port = "<%= @params["gnresolver_api_port"] %>";
 }
 
+backend opendata {
+  .host = "<%= @params["opendata_ip"] %>";
+  .port = "<%= @params["opendata_port"] %>";
+}
+
 backend resolver_bhl {
   .host = "<%= @params["resolver_bhl_ip"] %>";
   .port = "<%= @params["resolver_bhl_port"] %>";
@@ -141,6 +146,8 @@ sub vcl_recv {
     } else {
       set req.backend = gnresolver;
     }
+  } elseif (req.http.host ~ "^<%= @params["opendata_host"] %>$") {
+    set req.backend = opendata;
   } elseif (req.http.host ~ "^<%= @params["sensu_host"] %>$") {
     set req.backend = sensu;
   } elseif (req.http.host ~ "^<%= @params["resolver_host"] %>$") {
